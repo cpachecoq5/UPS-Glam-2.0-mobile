@@ -1,0 +1,193 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:app_pace_network/main.dart';
+
+class InvoiceScreen extends StatelessWidget {
+  final TextEditingController clientNameController = TextEditingController();
+  final TextEditingController clientAddressController = TextEditingController();
+
+  // Datos ingresados previamente
+  final String startTime = "01:00 AM";
+  final String endTime = "04:00 AM";
+  final String vehicleType = "Sedan";
+  final String tripType = "Standard";
+  final String pickUp = "123 Main St";
+  final List<String> stops = ["456 Elm St", "789 Oak St"];
+  final String dropOff = "987 Maple St";
+  final double standardHrlyTipe = 65;
+  final double parking = 0;
+  final double tolls = 0;
+  final double surchargesType = 5.5;
+
+
+  // Método para convertir una cadena de hora en DateTime
+  DateTime parseTime(String time) {
+    return DateFormat("hh:mm a").parse(time);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String currentDate = DateFormat('MMMM d\'th\' yyyy').format(DateTime.now());
+
+    // Convertir las horas de inicio y fin a DateTime
+    DateTime startDateTime = parseTime(startTime);
+    DateTime endDateTime = parseTime(endTime);
+
+    // Calcular la duración en horas
+    double travelTime = endDateTime.difference(startDateTime).inMinutes / 60.0;
+
+    // Calcular la tarifa (90 por hora)
+    double standardHrly = travelTime * standardHrlyTipe;
+
+    // Calcular Gratificacion
+    double gratuity = standardHrly * 0.2;
+
+    // Calcular recargos por combustible
+    double fuelSurcharges = travelTime * surchargesType;
+
+    // Valores Sumados
+    double valSum = standardHrly + parking + tolls + fuelSurcharges;
+
+    // Calculo de impuestos
+    double nysTaxes = valSum * 0.08875;
+
+    // Valores Carga
+    double charge = valSum + gratuity + nysTaxes;
+
+    // Carga Tarjeta de Credito
+    double creditCardCharge = charge * 0.04;
+
+    // Calculo Subtotales
+    double subtotals = gratuity + parking + tolls + fuelSurcharges + nysTaxes + creditCardCharge;
+
+    // Calculo Total
+    double balance = subtotals + standardHrly;
+
+    
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Invoice'),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Encabezado ajustado sin desbordamiento
+              Wrap(
+                spacing: 16,
+                runSpacing: 16, // Espaciado entre filas
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Pace Network Inc.',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                      SizedBox(height: 12), // Espacio entre líneas
+                      Text('29-22 Curtis St'),
+                      SizedBox(height: 4), // Espacio entre líneas
+                      Text('East Elmhurst, NY 11369'),
+                      SizedBox(height: 16), // Espacio entre secciones
+                      Text('T. 347-678-4465'),
+                      SizedBox(height: 4), // Espacio entre líneas
+                      Text('pacenetwork.inc@gmail.com'),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'ITEMIZED TRIP RECEIPT',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                      SizedBox(height: 24), // Espacio adicional debajo del título
+                      Text('Date: $currentDate'),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 32), // Espacio adicional debajo del encabezado
+
+              // CLIENT NAME
+              Text(
+                'CLIENT NAME',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextField(
+                controller: clientNameController,
+                decoration: InputDecoration(hintText: 'Enter client name'),
+              ),
+              SizedBox(height: 16),
+
+              // CLIENT ADDRESS
+              Text(
+                'CLIENT ADDRESS',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextField(
+                controller: clientAddressController,
+                decoration: InputDecoration(hintText: 'Enter client address'),
+              ),
+              SizedBox(height: 24),
+
+              // Trip details
+              Text('Trip Details:', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text('Start Time: $startTime'),
+              Text('End Time: $endTime'),
+              Text('Vehicle Type: $vehicleType'),
+              Text('Trip Type: $tripType'),
+              Text('Pick Up: $pickUp'),
+              SizedBox(height: 8),
+              Text('Stops:'),
+              ...stops.map((stop) => Text('- $stop')).toList(),
+              SizedBox(height: 8),
+              Text('Drop Off: $dropOff'),
+              Text('Travel time: $travelTime hours'),
+              Text('Standard Hrly: \$${standardHrly.toStringAsFixed(2)}'),
+              Text('Gratuity: \$${gratuity.toStringAsFixed(2)}'),
+              Text('Parking: \$${parking.toStringAsFixed(2)}'),
+              Text('Tolls: \$${tolls.toStringAsFixed(2)}'),
+              Text('Fuel Surcharges: \$${fuelSurcharges.toStringAsFixed(2)}'),
+              Text('NYS Tax: \$${nysTaxes.toStringAsFixed(2)}'),
+              Text('Credit Card Charge: \$${creditCardCharge.toStringAsFixed(2)}'),
+              Text('Subtotals: \$${subtotals.toStringAsFixed(2)}'),
+              Text('Balance: \$${balance.toStringAsFixed(2)}'),
+
+
+              SizedBox(height: 32),
+
+              // Botón para regresar al menú principal
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            MyHomePage(title: 'Pace Network.Inc'),
+                      ),
+                      (route) => false,
+                    );
+                  },
+                  child: Text('Cancel Invoice'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
